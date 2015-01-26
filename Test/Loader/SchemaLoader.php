@@ -85,17 +85,49 @@ class SchemaLoader
             case ($connection->getDriver() instanceof SqliteDriver):
                 $this->loadSqliteSchema();
                 break;
+            case ($connection->getDriver() instanceof \Doctrine\DBAL\Driver\PDOMySql\Driver):
+                $this->loadMysqlSchema();
+                break;
             default:
-            	// Drop and create database schema
-            	$schemaTool = new SchemaTool($this->entityManager);
-            	$cmf = $this->entityManager->getMetadataFactory();
-            	$classes = $cmf->getAllMetadata();
-            	$schemaTool->dropDatabase();
-            	$schemaTool->createSchema($classes);
+            	$this->purge();
                 break;
         }
     }
-
+    
+    /**
+     * Purge table of database
+     *
+     */
+    private function purge()
+    {
+    	$purger = new ORMPurger($this->entityManager);
+    	$purger->setPurgeMode($purgeMode);
+    	
+    	$executor = new ORMExecutor($this->entityManager, $purger);
+    	$executor->setReferenceRepository(new ReferenceRepository($this->entityManager));
+    	
+    	$executor->purge();
+    }
+    /**
+     * Load MySQL Driver Schema.
+     */
+    private function loadMysqlSchema()
+    {
+    	$tables = $this->entityManager->getConnection()->fetchAll("SHOW TABLES;");
+    	$schemaTool = new SchemaTool($this->entityManager);
+    	if (count($tables) <= 0) {
+    	 	// Create schema
+    		$cmf = $this->entityManager->getMetadataFactory();
+    		$classes = $cmf->getAllMetadata();
+    		$schemaTool->createSchema($classes);
+    		return;
+    	} else {
+    		$this->entityManager->getConnection()->beginTransaction();
+    		$this->entityManager->getConnection()->executeQuery("SET FOREIGN_KEY_CHECKS=0;");
+    		$this->purge();
+    		$this->entityManager->getConnection()->commit();
+    	}
+    }
     /**
      * Load SQLite Driver Schema.
      */
