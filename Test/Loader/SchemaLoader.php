@@ -86,13 +86,12 @@ class SchemaLoader
                 $this->loadSqliteSchema();
                 break;
             default:
-                $purger = new ORMPurger($this->entityManager);
-                $purger->setPurgeMode($purgeMode);
-
-                $executor = new ORMExecutor($this->entityManager, $purger);
-                $executor->setReferenceRepository(new ReferenceRepository($this->entityManager));
-
-                $executor->purge();
+            	// Drop and create database schema
+            	$schemaTool = new SchemaTool($this->entityManager);
+            	$cmf = $this->entityManager->getMetadataFactory();
+            	$classes = $cmf->getAllMetadata();
+            	$schemaTool->dropDatabase();
+            	$schemaTool->createSchema($classes);
                 break;
         }
     }
