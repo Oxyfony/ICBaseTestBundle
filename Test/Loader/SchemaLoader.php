@@ -89,7 +89,7 @@ class SchemaLoader
                 $this->loadMysqlSchema();
                 break;
             default:
-            	$this->purge();
+            	$this->purge($purgeMode);
                 break;
         }
     }
@@ -98,7 +98,7 @@ class SchemaLoader
      * Purge table of database
      *
      */
-    private function purge()
+    private function purge($purgeMode = ORMPurger::PURGE_MODE_TRUNCATE)
     {
     	$purger = new ORMPurger($this->entityManager);
     	$purger->setPurgeMode($purgeMode);
