@@ -57,10 +57,10 @@ abstract class WebTestCase extends BaseWebTestCase
         if (empty($fixtureList) && ! $this->forceSchemaLoad) {
             return;
         }
-
+		
         $fixtureLoader = new Loader\FixtureLoader($this->client, static::FIXTURES_PURGE_MODE);
         $executor      = $fixtureLoader->load(static::MANAGER_NAME, $fixtureList);
-
+        
         $this->referenceRepository = $executor->getReferenceRepository();
 
         $cacheDriver = $this->referenceRepository->getManager()->getMetadataFactory()->getCacheDriver();
