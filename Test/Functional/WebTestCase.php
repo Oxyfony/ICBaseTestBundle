@@ -47,10 +47,8 @@ abstract class WebTestCase extends BaseWebTestCase
     protected function setUp()
     {
         parent::setUp();
-
         // Initialize the client; it is used in all loaders and helpers
         $this->client = static::initializeClient();
-
         // Only initialize schema and fixtures if any are defined
         $fixtureList = static::getFixtureList();
 
